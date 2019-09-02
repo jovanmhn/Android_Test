@@ -74,7 +74,6 @@ public class TestActivity extends AppCompatActivity {
                 catch(Throwable t){
                     Log.e("JSON", "Malformed JSON: \"" + json + "\"");
                 }
-
             }
         }
 
