@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/adapter_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:weightSum="100">
+
+    <TextView
+        android:id="@+id/textViewGodina"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_weight="66.6"
+        android:gravity="center"
+        android:text="Godina"
+        android:textAlignment="center" />
+
+    <LinearLayout
+        android:id="@+id/adapter_listview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="33.3"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textViewKlijent"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:gravity="center"
+            android:text="Klijent" />
+
+        <TextView
+            android:gravity="center"
+            android:text="Opis"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:id="@+id/textViewOpis"
+            android:layout_below="@+id/textViewKlijent"/>
+    </LinearLayout>
+
+</LinearLayout>
