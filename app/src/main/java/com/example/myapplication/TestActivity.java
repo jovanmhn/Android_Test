@@ -3,6 +3,8 @@ package com.example.myapplication;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.StrictMode;
 import android.util.Log;
 import android.view.Menu;
@@ -10,12 +12,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,6 +47,8 @@ public class TestActivity extends AppCompatActivity {
     //}
     private ListView lv;
     private ProgressBar pg;
+    private SwipeRefreshLayout swipe;
+    MojAdapter adapter;
 
 
     @Override
@@ -51,7 +57,7 @@ public class TestActivity extends AppCompatActivity {
         setContentView(R.layout.test_activity);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        swipe = findViewById(R.id.swipe);
 
 
 
@@ -82,14 +88,9 @@ public class TestActivity extends AppCompatActivity {
 
 
 
-        lv = (ListView)findViewById(R.id.listviewmain);
-        MojAdapter adapter = new MojAdapter(this,R.layout.adapter_view_layout,listaKnjigaView);
-//        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
-//                this,
-//                android.R.layout.simple_list_item_1,
-//                prostaLista
-//        );
-//        lv.setAdapter(arrayAdapter);
+        lv = findViewById(R.id.listviewmain);
+        adapter = new MojAdapter(this,R.layout.adapter_view_layout,listaKnjigaView);
+
         lv.setAdapter(adapter);
 
 
@@ -116,6 +117,56 @@ public class TestActivity extends AppCompatActivity {
             }
         });
 
+        swipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener()
+        {
+            @Override
+            public void onRefresh()
+            {
+                //refreshData();
+                OdvojeniThread thread = new OdvojeniThread();
+                thread.start();
+                //adapter.notifyDataSetChanged();
+                //swipe.setRefreshing(false);
+            }
+        });
+
+
+    }
+    public class OdvojeniThread extends Thread{
+
+        @Override
+        public void run()
+        {
+            try{
+                jsonLista = new JSONArray(getJSONObjectFromURL());
+            }
+            catch(Throwable tr){}
+            JSONArray2KnjigaArray(jsonLista);
+            getProstaLista(listaKnjiga);
+            getKnjigeZaView(listaKnjiga);
+
+            Handler test_handler = new Handler(Looper.getMainLooper());
+            test_handler.post(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    adapter.notifyDataSetChanged();
+                    swipe.setRefreshing(false);
+                }
+            });
+        }
+    }
+
+    private void refreshData()
+    {
+        try{
+        jsonLista = new JSONArray(getJSONObjectFromURL());
+        }
+        catch(Throwable tr){}
+        JSONArray2KnjigaArray(jsonLista);
+        getProstaLista(listaKnjiga);
+        getKnjigeZaView(listaKnjiga);
 
     }
 
@@ -191,40 +242,7 @@ public class TestActivity extends AppCompatActivity {
 
 
     }
-    public static JSONObject getJSONObjectFromURL(String urlString) throws IOException, JSONException {
 
-        HttpURLConnection urlConnection = null;
-
-        URL url = new URL(urlString);
-
-        urlConnection = (HttpURLConnection) url.openConnection();
-
-        urlConnection.setRequestMethod("GET");
-        urlConnection.setReadTimeout(10000 /* milliseconds */);
-        urlConnection.setConnectTimeout(15000 /* milliseconds */);
-
-        urlConnection.setDoOutput(true);
-
-        urlConnection.connect();
-
-        BufferedReader br=new BufferedReader(new InputStreamReader(url.openStream()));
-
-        char[] buffer = new char[1024];
-
-        String jsonString = new String();
-
-        StringBuilder sb = new StringBuilder();
-        String line;
-        while ((line = br.readLine()) != null) {
-            sb.append(line+"\n");
-        }
-        br.close();
-
-        jsonString = sb.toString();
-
-        System.out.println("JSON: " + jsonString);
-
-        return new JSONObject(jsonString);}
 
     public KlijentZaSerijalizaciju JSONtoKlijent(JSONObject jsonObject)throws JSONException {
         KlijentZaSerijalizaciju klijent = new KlijentZaSerijalizaciju();
@@ -262,6 +280,7 @@ public class TestActivity extends AppCompatActivity {
     }
 
     public void JSONArray2KnjigaArray(JSONArray jsonLista){
+        listaKnjiga.clear();
         if(jsonLista!=null){
             for(int i=0;i<jsonLista.length();i++){
                 Knjiga knj = new Knjiga();
@@ -290,9 +309,56 @@ public class TestActivity extends AppCompatActivity {
         }
     }
     public void getKnjigeZaView(ArrayList<Knjiga> lista){
+        listaKnjigaView.clear();
         for (Knjiga k:listaKnjiga){
             listaKnjigaView.add(new KnjigaZaView(k.id_knjiga,k.klijent,k.godina,k.opis));
         }
+    }
+
+    public String getJSONObjectFromURL() throws IOException, JSONException {
+
+        HttpURLConnection urlConnection = null;
+
+        EditText editText = (EditText) findViewById(R.id.editText);
+        android.net.Uri.Builder builder = new android.net.Uri.Builder();
+        builder.scheme("http")
+                .encodedAuthority("192.168.1.131:1990")
+                .appendPath("WebForm1.aspx")
+                .appendQueryParameter("klijent", "11")
+                .appendQueryParameter("tip", "knj");
+
+
+        URL url = new URL(builder.build().toString());
+
+        urlConnection = (HttpURLConnection) url.openConnection();
+
+        urlConnection.setRequestMethod("GET");
+        urlConnection.setReadTimeout(10000 /* milliseconds */);
+        urlConnection.setConnectTimeout(15000 /* milliseconds */);
+
+        urlConnection.setDoOutput(true);
+
+        urlConnection.connect();
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+
+        char[] buffer = new char[1024];
+
+        String jsonString = new String();
+
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) {
+            sb.append(line + "\n");
+        }
+        br.close();
+
+        jsonString = sb.toString();
+
+        System.out.println("JSON: " + jsonString);
+
+        //return new JSONObject(jsonString);}
+        return jsonString;
     }
 
 }
