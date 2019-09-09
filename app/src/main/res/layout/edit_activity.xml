@@ -88,8 +88,8 @@
 
     <EditText
         android:id="@+id/editText4"
-        android:layout_width="361dp"
-        android:layout_height="121dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="25dp"
         android:layout_marginLeft="25dp"
         android:layout_marginTop="5dp"

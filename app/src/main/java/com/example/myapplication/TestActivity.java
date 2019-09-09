@@ -6,7 +6,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.StrictMode;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -49,7 +52,7 @@ public class TestActivity extends AppCompatActivity {
     private ProgressBar pg;
     private SwipeRefreshLayout swipe;
     MojAdapter adapter;
-
+    private EditText pretragaEditText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +61,7 @@ public class TestActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         swipe = findViewById(R.id.swipe);
-
+        pretragaEditText = findViewById(R.id.pretragaEditText);
 
 
         Bundle extras = getIntent().getExtras();
@@ -129,6 +132,45 @@ public class TestActivity extends AppCompatActivity {
                 //swipe.setRefreshing(false);
             }
         });
+        pretragaEditText.setOnFocusChangeListener(new View.OnFocusChangeListener()
+        {
+            @Override
+            public void onFocusChange(View view, boolean b)
+            {
+                switch(pretragaEditText.getText().toString())
+                {
+                    case "Pretraga...":
+                        pretragaEditText.setText("");
+                        break;
+                    case "":
+                        pretragaEditText.setText("Pretraga...");
+                        break;
+                }
+            }
+        });
+
+        pretragaEditText.addTextChangedListener(new TextWatcher()
+        {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2)
+            {
+                String search = pretragaEditText.getText().toString();
+                //adapter.
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2)
+            {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable)
+            {
+
+            }
+        });
+
 
 
     }

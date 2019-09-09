@@ -10,6 +10,8 @@ import com.google.android.material.snackbar.Snackbar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.os.StrictMode;
 import android.view.View;
 import android.view.Menu;
@@ -64,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ProgressBar pg = findViewById(R.id.progressBar);
+                /*ProgressBar pg = findViewById(R.id.progressBar);
                 pg.setVisibility(View.VISIBLE);
                 try{
                     String jsonString = getJSONObjectFromURL();
@@ -90,13 +92,86 @@ public class MainActivity extends AppCompatActivity {
                 }
                 catch(JSONException e){
                     e.printStackTrace();
-                }
-
+                }*/
+                AsyncKnjige thread = new AsyncKnjige();
+                thread.start();
 
             }
         });
 
 
+    }
+    public class AsyncKnjige extends Thread
+    {
+        @Override
+        public void run()
+        {
+            Handler handler = new Handler(Looper.getMainLooper());
+            handler.post(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    ProgressBar pg = findViewById(R.id.progressBar);
+                    pg.setVisibility(View.VISIBLE);
+                    btn = findViewById(R.id.button);
+                    btn.setEnabled(false);
+                }
+            });
+            try{
+                String jsonString = getJSONObjectFromURL();
+                if(jsonString.charAt(0)=='{'){
+                    jsonObject = new JSONObject(getJSONObjectFromURL());
+                }
+
+
+                EditText editTextTip = findViewById(R.id.editTextTip);
+                if(editTextTip.getText().toString().equals("knj")){
+                    Intent intent = new Intent(getApplicationContext(),TestActivity.class);
+                    intent.putExtra("knjige", new String(getJSONObjectFromURL()));
+                    startActivity(intent);
+
+                    handler.post(new Runnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            ProgressBar pg = findViewById(R.id.progressBar);
+                            pg.setVisibility(View.GONE);
+                            btn = findViewById(R.id.button);
+                            btn.setEnabled(true);
+                        }
+                    });
+                }
+                else{
+
+                    handler.post(new Runnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            try
+                            {
+                                RefreshSmece(JSONtoKlijent(jsonObject));
+                            } catch (JSONException e)
+                            {
+                                e.printStackTrace();
+                            }
+                            ProgressBar pg = findViewById(R.id.progressBar);
+                            pg.setVisibility(View.GONE);
+                            btn = findViewById(R.id.button);
+                            btn.setEnabled(true);
+                        }
+                    });
+                }
+            }
+            catch(IOException e){
+                e.printStackTrace();
+            }
+            catch(JSONException e){
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override

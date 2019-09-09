@@ -13,6 +13,16 @@
         android:layout_margin="5dp">
 
     </TextView>
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="left"
+        android:layout_margin="5dp"
+        android:text="Pretraga..."
+        android:textSize="14sp"
+        android:id="@+id/pretragaEditText">
+
+    </EditText>
 
 <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
     android:layout_width="match_parent"
